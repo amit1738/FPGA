@@ -36,7 +36,7 @@ module Counter(clk, init_regs, count_enabled, time_reading);
    wire tick;
 
    // Clock Divider (0 to CLK_FREQ-1)
-   Lim_Inc #(.N($clog2(CLK_FREQ)), .L(CLK_FREQ)) clk_divider_inst (
+   Lim_Inc #(.L(CLK_FREQ)) clk_divider_inst (
        .a(clk_cnt),
        .ci(count_enabled),
        .sum(next_clk_cnt),
