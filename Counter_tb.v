@@ -21,6 +21,8 @@
 module Counter_tb();
 
     reg clk, init_regs, count_enabled, correct, loop_was_skipped;
+    reg count_sample, show_sample;
+
     wire [7:0] time_reading;
     wire [3:0] tens_seconds_wire;
     wire [3:0] ones_seconds_wire;
@@ -33,7 +35,6 @@ module Counter_tb();
         .count_enabled(count_enabled),
         .time_reading(time_reading)
     );
-    // TODO
         
     assign tens_seconds_wire = time_reading[7:4];
     assign ones_seconds_wire = time_reading[3:0];
@@ -51,13 +52,14 @@ module Counter_tb();
         #20
         init_regs = 0;
         count_enabled = 1;        
+
         // Remember that every 1000000 clocks are 10 milliseconds
         for( ts=0; ts<1; ts=ts+1 ) begin // not more than 1*10 seconds check
             for( os=0; os<2; os=os+1 ) begin // not more than 2*1 seconds check
-                            #(99999999+sync) // FILL HERE THE "correct" signal MAINTENANCE 
+                            #(99999999+sync)
+                            correct = correct & (tens_seconds_wire == ts) & (ones_seconds_wire == (os + 1));
                             sync = sync | 1;
                             loop_was_skipped = 0;
-
            end
         end
         
