@@ -30,11 +30,18 @@ module Counter(clk, init_regs, count_enabled, time_reading);
    reg [3:0] ones_seconds;    
    reg [3:0] tens_seconds;      
    
+   wire [$clog2(CLK_FREQ)-1:0] next_clk_cnt;
    wire [3:0] next_ones, next_tens;
    wire co_ones, co_tens;
    wire tick;
 
-   assign tick = (clk_cnt == CLK_FREQ - 1);
+   // Clock Divider (0 to CLK_FREQ-1)
+   Lim_Inc #(.N($clog2(CLK_FREQ)), .L(CLK_FREQ)) clk_divider_inst (
+       .a(clk_cnt),
+       .ci(count_enabled),
+       .sum(next_clk_cnt),
+       .co(tick)
+   );
 
    // Ones Counter (0-9)
    Lim_Inc #(.L(10)) counter_ones_inst (
@@ -62,13 +69,7 @@ module Counter(clk, init_regs, count_enabled, time_reading);
             ones_seconds <= 0;
             tens_seconds <= 0;
         end else if (count_enabled) begin
-            // Clock Divider
-            if (tick)
-                clk_cnt <= 0;
-            else
-                clk_cnt <= clk_cnt + 1;
-            
-            // Update Counters
+            clk_cnt <= next_clk_cnt;
             ones_seconds <= next_ones;
             tens_seconds <= next_tens;
         end
