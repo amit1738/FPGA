@@ -28,8 +28,8 @@ module Lim_Inc_tb();
     
     // Instantiate the UUT (Unit Under Test)
     
-    localparam L = 7;
-    Lim_Inc #(.N(4), .L(L)) uut (
+    localparam L = 11;
+    Lim_Inc #(.L(L)) uut (
         .a(a), 
         .ci(ci), 
         .sum(sum), 
