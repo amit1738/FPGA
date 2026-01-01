@@ -37,7 +37,7 @@ module Counter(clk, init_regs, count_enabled, time_reading);
    assign tick = (clk_cnt == CLK_FREQ - 1);
 
    // Ones Counter (0-9)
-   Lim_Inc #(.N(4), .L(10)) counter_ones_inst (
+   Lim_Inc #(.L(10)) counter_ones_inst (
        .a(ones_seconds),
        .ci(tick),
        .sum(next_ones),
@@ -45,7 +45,7 @@ module Counter(clk, init_regs, count_enabled, time_reading);
    );
 
    // Tens Counter (0-9)
-   Lim_Inc #(.N(4), .L(10)) counter_tens_inst (
+   Lim_Inc #(.L(10)) counter_tens_inst (
        .a(tens_seconds),
        .ci(co_ones),
        .sum(next_tens),
