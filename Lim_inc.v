@@ -18,7 +18,7 @@
 
 module Lim_Inc(a, ci, sum, co);
     
-    parameter L = 10;
+    parameter L = 11;
     localparam N = $clog2(L);
     
     input  [N-1:0] a;
