@@ -94,6 +94,4 @@ module Stash_tb();
     end
     
     always #5 clk = ~clk;
-    
-    always #5 clk = ~clk;
 endmodule
