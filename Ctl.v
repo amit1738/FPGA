@@ -26,7 +26,7 @@ module Ctl(clk, reset, trig, split, init_regs, count_enabled);
    //-------------Internal Constants--------------------------
    localparam SIZE = 2;
    localparam IDLE  = 2'b10, COUNTING = 2'b01, PAUSED = 2'b00 ;
-   reg [SIZE-1:0] 	  state;
+   reg [SIZE-1:0] 	  state = IDLE;
 
    //-------------Transition Function (Delta) ----------------
    always @(posedge clk)
