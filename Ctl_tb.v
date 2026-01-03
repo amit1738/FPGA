@@ -176,6 +176,10 @@ module Ctl_tb();
         // COUNTING self loop (reset=0, trig=0)
         apply_and_check(0, 0, 0);
         
+        // Check being in COUNTING and get rise of trig
+        // This should transition to PAUSED and disable counting
+        apply_and_check(0, 1, 0);
+        
         // COUNTING -> IDLE via Reset
         apply_and_check(1, 0, 0);
 
