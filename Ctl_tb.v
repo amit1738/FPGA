@@ -161,37 +161,48 @@ module Ctl_tb();
 
         #20;
 
-        // IDLE self loop
+        $display("Starting Directed Tests...");
+
+        // 1. IDLE State Tests
+        // IDLE self loop (reset=0, trig=0)
         apply_and_check(0, 0, 0);
-
-        // IDLE to COUNTING
-        apply_and_check(0, 1, 0);
-
-        // COUNTING self loop
-        apply_and_check(0, 0, 0);
-
-        // COUNTING to PAUSED
-        apply_and_check(0, 1, 0);
-
-        // PAUSED self loop
-        apply_and_check(0, 0, 0);
-
-        // PAUSED to COUNTING
-        apply_and_check(0, 1, 0);
-
-        // COUNTING reset
+        // IDLE self loop via Reset (reset=1)
         apply_and_check(1, 0, 0);
 
-        // Go to COUNTING again
+        // 2. IDLE -> COUNTING
         apply_and_check(0, 1, 0);
 
-        // Go to PAUSED again
+        // 3. COUNTING State Tests
+        // COUNTING self loop (reset=0, trig=0)
+        apply_and_check(0, 0, 0);
+        
+        // COUNTING -> IDLE via Reset
+        apply_and_check(1, 0, 0);
+
+        // Return to COUNTING
         apply_and_check(0, 1, 0);
 
-        // PAUSED to IDLE via split
+        // 4. COUNTING -> PAUSED
+        apply_and_check(0, 1, 0);
+
+        // 5. PAUSED State Tests
+        // PAUSED self loop (reset=0, trig=0, split=0)
+        apply_and_check(0, 0, 0);
+
+        // PAUSED -> COUNTING
+        apply_and_check(0, 1, 0);
+
+        // Return to PAUSED
+        apply_and_check(0, 1, 0);
+
+        // PAUSED -> IDLE via Split
         apply_and_check(0, 0, 1);
 
-        // Reset in IDLE
+        // 6. PAUSED -> IDLE via Reset
+        // Get back to PAUSED first
+        apply_and_check(0, 1, 0); // IDLE -> COUNTING
+        apply_and_check(0, 1, 0); // COUNTING -> PAUSED
+        // Now test Reset from PAUSED
         apply_and_check(1, 0, 0);
 
         #10;
