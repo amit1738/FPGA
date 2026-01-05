@@ -32,9 +32,9 @@ module Ctl_tb();
     );
 
     // Expected state encoding for TB model
-    localparam S_IDLE     = 2'd0;
-    localparam S_COUNTING = 2'd1;
-    localparam S_PAUSED   = 2'd2;
+    localparam IDLE     = 2'd2;
+    localparam COUNTING = 2'd1;
+    localparam PAUSED   = 2'd0;
 
     reg [1:0] exp_state;
 
@@ -45,33 +45,35 @@ module Ctl_tb();
         input [1:0] st;
         input r, t, s;
         begin
-            case (st)
-                S_IDLE: begin
-                    exp_out = 2'b10;
-                end
+            if (r) begin
+                exp_out = 2'b10;
+            end
+            else begin
+                case (st)
+                    IDLE: begin
+                        if (t) exp_out = 2'b01;
+                        else    exp_out = 2'b10;
+                    end
 
-                S_COUNTING: begin
-                    if (r)
-                        exp_out = 2'b01;
-                    else if (t)
-                        exp_out = 2'b00;
-                    else
-                        exp_out = 2'b01;
-                end
+                    COUNTING: begin
+                        if (t)
+                            exp_out = 2'b00;
+                        else
+                            exp_out = 2'b01;
+                    end
 
-                S_PAUSED: begin
-                    if (r)
-                        exp_out = 2'b00;
-                    else if (t)
-                        exp_out = 2'b01;
-                    else
-                        exp_out = 2'b00;
-                end
+                    PAUSED: begin
+                        if (t)
+                            exp_out = 2'b01;
+                        else
+                            exp_out = 2'b00;
+                    end
 
-                default: begin
-                    exp_out = 2'bxx;
-                end
-            endcase
+                    default: begin
+                        exp_out = 2'bxx;
+                    end
+                endcase
+            end
         end
     endfunction
 
@@ -81,37 +83,37 @@ module Ctl_tb();
         input r, t, s;
         begin
             case (st)
-                S_IDLE: begin
+                IDLE: begin
                     if (r)
-                        exp_next_state = S_IDLE;
+                        exp_next_state = IDLE;
                     else if (t)
-                        exp_next_state = S_COUNTING;
+                        exp_next_state = COUNTING;
                     else
-                        exp_next_state = S_IDLE;
+                        exp_next_state = IDLE;
                 end
 
-                S_COUNTING: begin
+                COUNTING: begin
                     if (r)
-                        exp_next_state = S_IDLE;
+                        exp_next_state = IDLE;
                     else if (t)
-                        exp_next_state = S_PAUSED;
+                        exp_next_state = PAUSED;
                     else
-                        exp_next_state = S_COUNTING;
+                        exp_next_state = COUNTING;
                 end
 
-                S_PAUSED: begin
+                PAUSED: begin
                     if (r)
-                        exp_next_state = S_IDLE;
+                        exp_next_state = IDLE;
                     else if (t)
-                        exp_next_state = S_COUNTING;
+                        exp_next_state = COUNTING;
                     else if (s)
-                        exp_next_state = S_IDLE;
+                        exp_next_state = IDLE;
                     else
-                        exp_next_state = S_PAUSED;
+                        exp_next_state = PAUSED;
                 end
 
                 default: begin
-                    exp_next_state = S_IDLE;
+                    exp_next_state = IDLE;
                 end
             endcase
         end
@@ -149,7 +151,7 @@ module Ctl_tb();
         split = 0;
 
         // TB model starts in IDLE
-        exp_state = S_IDLE;
+        exp_state = IDLE;
 
         #10;
         reset = 0;
@@ -159,37 +161,52 @@ module Ctl_tb();
 
         #20;
 
-        // IDLE self loop
+        $display("Starting Directed Tests...");
+
+        // 1. IDLE State Tests
+        // IDLE self loop (reset=0, trig=0)
         apply_and_check(0, 0, 0);
-
-        // IDLE to COUNTING
-        apply_and_check(0, 1, 0);
-
-        // COUNTING self loop
-        apply_and_check(0, 0, 0);
-
-        // COUNTING to PAUSED
-        apply_and_check(0, 1, 0);
-
-        // PAUSED self loop
-        apply_and_check(0, 0, 0);
-
-        // PAUSED to COUNTING
-        apply_and_check(0, 1, 0);
-
-        // COUNTING reset
+        // IDLE self loop via Reset (reset=1)
         apply_and_check(1, 0, 0);
 
-        // Go to COUNTING again
+        // 2. IDLE -> COUNTING
         apply_and_check(0, 1, 0);
 
-        // Go to PAUSED again
+        // 3. COUNTING State Tests
+        // COUNTING self loop (reset=0, trig=0)
+        apply_and_check(0, 0, 0);
+        
+        // Check being in COUNTING and get rise of trig
+        // This should transition to PAUSED and disable counting
+        apply_and_check(0, 1, 0);
+        
+        // COUNTING -> IDLE via Reset
+        apply_and_check(1, 0, 0);
+
+        // Return to COUNTING
         apply_and_check(0, 1, 0);
 
-        // PAUSED to IDLE via split
+        // 4. COUNTING -> PAUSED
+        apply_and_check(0, 1, 0);
+
+        // 5. PAUSED State Tests
+        // PAUSED self loop (reset=0, trig=0, split=0)
+        apply_and_check(0, 0, 0);
+
+        // PAUSED -> COUNTING
+        apply_and_check(0, 1, 0);
+
+        // Return to PAUSED
+        apply_and_check(0, 1, 0);
+
+        // PAUSED -> IDLE via Split
         apply_and_check(0, 0, 1);
 
-        // Reset in IDLE
+        // 6. PAUSED -> IDLE via Reset
+        // Get back to PAUSED first
+        apply_and_check(0, 1, 0); // IDLE -> COUNTING
+        apply_and_check(0, 1, 0); // COUNTING -> PAUSED
+        // Now test Reset from PAUSED
         apply_and_check(1, 0, 0);
 
         #10;
